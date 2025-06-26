@@ -4,7 +4,7 @@ import time
 import can
 from piper_sdk import C_PiperInterface_V2
 
-from piper_cli.protocols import disable_arm_msg
+from piper_cli.protocols import disable_arm_msg, motion_ctrl_2_msg
 
 
 def command_disable(args: argparse.Namespace) -> None:
@@ -12,7 +12,7 @@ def command_disable(args: argparse.Namespace) -> None:
         piper = C_PiperInterface_V2(args.can_interface)
         piper.ConnectPort()
 
-        piper.MotionCtrl_2(0x01, 0x01, 20, 0x00)
+        bus.send(motion_ctrl_2_msg(move_mode="joint", move_speed_rate=20))
         time.sleep(0.1)
 
         positions = [0, 0, 0, 0, 17000, 0]
