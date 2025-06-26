@@ -4,7 +4,11 @@ import time
 import can
 from piper_sdk import C_PiperInterface_V2
 
-from piper_cli.protocols import enable_arm_msg
+from piper_cli.protocols import (
+    enable_arm_msg,
+    is_low_spd_info_msg,
+    parse_low_spd_info_msg,
+)
 
 
 def command_enable(args: argparse.Namespace) -> None:
@@ -14,20 +18,12 @@ def command_enable(args: argparse.Namespace) -> None:
         piper = C_PiperInterface_V2(args.can_interface)
         piper.ConnectPort()
 
-        enabled = False
-        while not enabled:
-            time.sleep(0.1)
-            info = piper.GetArmLowSpdInfoMsgs()
-            enabled = all(
-                [
-                    info.motor_1.foc_status.driver_enable_status,
-                    info.motor_2.foc_status.driver_enable_status,
-                    info.motor_3.foc_status.driver_enable_status,
-                    info.motor_4.foc_status.driver_enable_status,
-                    info.motor_5.foc_status.driver_enable_status,
-                    info.motor_6.foc_status.driver_enable_status,
-                ]
-            )
+        enabled = [False] * 6
+        while not all(enabled):
+            msg = bus.recv()
+            if is_low_spd_info_msg(msg):
+                info = parse_low_spd_info_msg(msg)
+                enabled[info.joint_id - 1] = info.driver_status.driver_enabled
 
         piper.MotionCtrl_2(0x01, 0x01, 20, 0x00)
         time.sleep(0.1)
