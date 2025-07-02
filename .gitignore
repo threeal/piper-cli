@@ -1,7 +1,9 @@
 .*
+!.claude
 !.git*
 !.python-version
 
 *.egg-info
 __pycache__
 dist
+site
