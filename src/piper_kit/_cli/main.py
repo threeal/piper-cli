@@ -35,6 +35,14 @@ def main() -> None:
     teleop_parser = subparsers.add_parser("teleop", help="teleop the PiPER arm")
     teleop_subparsers = teleop_parser.add_subparsers(required=True)
 
+    teleop_cartesian_parser = teleop_subparsers.add_parser(
+        "cartesian", help="teleop the joint positions of PiPER arm"
+    )
+    teleop_cartesian_parser.set_defaults(func=command_teleop_joint)
+    teleop_cartesian_parser.add_argument(
+        "can_interface", nargs="?", default="can0", help="CAN interface to use"
+    )
+
     teleop_follow_parser = teleop_subparsers.add_parser(
         "follow", help="teleop the follower PiPER arm using the leader PiPER arm"
     )
